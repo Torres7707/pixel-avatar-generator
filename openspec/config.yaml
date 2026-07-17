@@ -1,0 +1,19 @@
+schema: spec-driven
+
+context: |
+  Tech stack: React 18 + TypeScript (strict) + Vite
+  Runtime: 纯前端浏览器应用，无后端
+  Persistence: localStorage
+  Rendering: Canvas 2D 像素画板，核心数据结构 PixelGrid = (string|null)[][]
+  Conventions: 函数组件 + hooks，严格类型，中文 UI 文案
+  Product: 像素风格头像生成器（绘制 / 镜像 / 随机生成 / 导出 PNG）
+
+# Per-artifact rules (optional)
+# Add custom rules for specific artifacts.
+# Example:
+#   rules:
+#     proposal:
+#       - Keep proposals under 500 words
+#       - Always include a "Non-goals" section
+#     tasks:
+#       - Break tasks into chunks of max 2 hours

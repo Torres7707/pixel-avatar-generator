@@ -1,0 +1,630 @@
+/* ============================ 布局 ============================ */
+.app {
+  min-height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ============================ Header ============================ */
+.app-header {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px 24px;
+  background: var(--panel);
+  border-bottom: 4px solid var(--pixel-border);
+  box-shadow: inset 0 0 0 2px var(--frame-inset), 0 4px 0 var(--pixel-shadow);
+  position: relative;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+.brand-logo {
+  font-size: 24px;
+  color: var(--accent);
+  filter: drop-shadow(2px 2px 0 var(--pixel-shadow));
+}
+.brand h1 {
+  margin: 0;
+  font-family: var(--font-pixel);
+  font-size: 24px;
+  letter-spacing: 2px;
+  color: var(--text);
+
+}
+.brand p {
+  margin: 2px 0 0;
+  font-size: 12px;
+  color: var(--muted);
+}
+
+/* GitHub 链接移到 header 右侧 */
+.gh {
+  position: absolute;
+  right: 20px;
+  font-size: 12px;
+  color: var(--muted);
+  text-decoration: none;
+  border: 2px solid var(--pixel-border);
+  padding: 4px 10px;
+  box-shadow: 2px 2px 0 var(--pixel-shadow);
+  transition: 0.05s;
+}
+.gh:hover {
+  color: var(--accent);
+  border-color: var(--accent);
+  transform: translate(1px, 1px);
+  box-shadow: 1px 1px 0 var(--pixel-shadow);
+}
+
+/* ============================ Toast ============================ */
+.toast {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin: 8px 18px;
+  padding: 10px 16px;
+  background: #f8d7d5;
+  border: 3px solid var(--danger);
+  box-shadow: inset 0 0 0 2px #e8c0be, 3px 3px 0 var(--pixel-shadow);
+  color: var(--danger);
+  font-size: 12px;
+}
+.toast-close {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  background: transparent;
+  border: 2px solid var(--danger);
+  box-shadow: 2px 2px 0 rgba(0,0,0,0.15);
+  color: var(--danger);
+  cursor: pointer;
+}
+.toast-close:active {
+  transform: translate(1px, 1px);
+  box-shadow: 1px 1px 0 rgba(0,0,0,0.15);
+}
+.toast-close .icon { width: 14px; height: 14px; }
+
+/* ============================ Layout ============================ */
+.layout {
+  flex: 1;
+  display: grid;
+  grid-template-columns: 240px 1fr 260px;
+  gap: 14px;
+  padding: 14px;
+  align-items: start;
+}
+
+.stage {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  padding-top: 4px;
+}
+
+.right-col {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+/* ============================ 底部主操作栏 ============================ */
+.bottom-bar {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  padding: 10px 0 4px;
+}
+
+/* ============================ 像素边框基础系统 ============================ */
+
+/* 木质面板 */
+.panel {
+  background: var(--panel);
+  border: 3px solid var(--pixel-border);
+  box-shadow: inset 0 0 0 2px var(--frame-inset), 3px 3px 0 var(--pixel-shadow);
+  padding: 14px;
+}
+
+.panel-sec {
+  margin-bottom: 16px;
+}
+.panel-sec:last-of-type {
+  margin-bottom: 0;
+}
+.panel-title {
+  margin: 0 0 10px;
+  font-family: var(--font-pixel);
+  font-size: 12px;
+  letter-spacing: 1px;
+  color: var(--text);
+
+}
+
+/* 像素按钮（主操作） */
+.btn-pixel {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 10px 18px;
+  background: var(--accent);
+  border: 3px solid var(--pixel-border);
+  box-shadow: inset 0 0 0 1px var(--frame-inset), 3px 3px 0 var(--pixel-shadow);
+  color: var(--text);
+  font-weight: 700;
+  font-size: 12px;
+  transition: transform 0.05s, box-shadow 0.05s;
+}
+.btn-pixel:hover {
+  filter: brightness(1.08);
+}
+.btn-pixel:active {
+  transform: translate(2px, 2px);
+  box-shadow: inset 0 0 0 1px var(--frame-inset), 1px 1px 0 var(--pixel-shadow);
+}
+.btn-pixel:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* 次操作像素按钮 */
+.btn-pixel-green {
+  background: var(--accent-2);
+  color: #fff;
+  border: 3px solid var(--pixel-border);
+  box-shadow: inset 0 0 0 1px #5a7a3e, 3px 3px 0 var(--pixel-shadow);
+}
+.btn-pixel-green:hover {
+  filter: brightness(1.08);
+}
+.btn-pixel-green:active {
+  transform: translate(2px, 2px);
+  box-shadow: inset 0 0 0 1px #5a7a3e, 1px 1px 0 var(--pixel-shadow);
+}
+
+/* ============================ Toolbar ============================ */
+.toolbar {
+  display: flex;
+  flex-direction: column;
+  position: sticky;
+  top: 14px;
+}
+.toolbar-foot {
+  margin-top: 14px;
+  padding-top: 10px;
+  border-top: 2px dashed var(--panel-dark);
+  font-size: 12px;
+  line-height: 1.6;
+}
+
+.muted {
+  color: var(--muted);
+  font-size: 12px;
+}
+.mini {
+  font-size: 12px;
+}
+.mono {
+  font-family: var(--font-body);
+  font-size: 12px;
+}
+
+/* ============================ 工具按钮 ============================ */
+.tool-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+.tool-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+  padding: 10px 6px;
+  background: var(--panel-2);
+  border: 2px solid var(--pixel-border);
+  box-shadow: 2px 2px 0 var(--pixel-shadow);
+  color: var(--text);
+  font-size: 12px;
+  transition: transform 0.05s, box-shadow 0.05s;
+}
+.tool-btn:hover {
+  filter: brightness(1.1);
+}
+.tool-btn:active {
+  transform: translate(1px, 1px);
+  box-shadow: 1px 1px 0 var(--pixel-shadow);
+}
+.tool-btn.active {
+  background: var(--accent);
+  border-color: var(--pixel-border);
+  box-shadow: inset 0 0 0 2px var(--frame-inset), 2px 2px 0 var(--pixel-shadow);
+}
+.tool-btn .icon {
+  width: 22px;
+  height: 22px;
+}
+
+.btn-row {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.icon-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  background: var(--panel-2);
+  border: 2px solid var(--pixel-border);
+  box-shadow: 2px 2px 0 var(--pixel-shadow);
+  color: var(--text);
+  transition: transform 0.05s, box-shadow 0.05s;
+}
+.icon-btn:hover:not(:disabled) {
+  filter: brightness(1.1);
+}
+.icon-btn:active:not(:disabled) {
+  transform: translate(1px, 1px);
+  box-shadow: 1px 1px 0 var(--pixel-shadow);
+}
+.icon-btn.active {
+  background: var(--accent);
+  box-shadow: inset 0 0 0 2px var(--frame-inset), 2px 2px 0 var(--pixel-shadow);
+}
+.icon-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+.icon-btn.danger:hover {
+  background: var(--danger);
+  color: #fff;
+}
+
+/* ============================ 分段控件（像素风） ============================ */
+.seg {
+  display: flex;
+  border: 2px solid var(--pixel-border);
+  box-shadow: 2px 2px 0 var(--pixel-shadow);
+  overflow: hidden;
+  width: 100%;
+  background: var(--panel-2);
+}
+.seg-btn {
+  flex: 1;
+  padding: 8px 4px;
+  background: transparent;
+  border: none;
+  color: var(--muted);
+  font-size: 12px;
+  transition: 0.05s;
+}
+.seg-btn:hover {
+  background: rgba(0,0,0,0.06);
+  color: var(--text);
+}
+.seg-btn.active {
+  background: var(--accent);
+  color: var(--text);
+  font-weight: 700;
+}
+
+.style-seg {
+  flex-wrap: wrap;
+}
+.style-seg .seg-btn {
+  font-size: 12px;
+}
+
+/* ============================ 主操作按钮 ============================ */
+.primary-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 10px 16px;
+  background: var(--accent);
+  border: 3px solid var(--pixel-border);
+  box-shadow: inset 0 0 0 1px var(--frame-inset), 3px 3px 0 var(--pixel-shadow);
+  color: var(--text);
+  font-weight: 700;
+  font-size: 12px;
+  transition: transform 0.05s, box-shadow 0.05s;
+}
+.primary-btn:hover {
+  filter: brightness(1.08);
+}
+.primary-btn:active {
+  transform: translate(2px, 2px);
+  box-shadow: inset 0 0 0 1px var(--frame-inset), 1px 1px 0 var(--pixel-shadow);
+}
+.primary-btn .icon {
+  color: var(--text);
+}
+.primary-btn.full {
+  width: 100%;
+  margin-bottom: 10px;
+}
+.primary-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+.primary-btn.outline {
+  background: transparent;
+  color: var(--text);
+  border: 3px solid var(--pixel-border);
+  box-shadow: inset 0 0 0 1px var(--frame-inset), 3px 3px 0 var(--pixel-shadow);
+}
+.primary-btn.outline:hover {
+  background: var(--surface);
+  filter: none;
+}
+
+/* ============================ 预设 ============================ */
+.preset-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+.preset-btn {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 6px;
+  background: var(--bg2);
+  border: 2px solid var(--pixel-border);
+  box-shadow: 2px 2px 0 var(--pixel-shadow);
+  color: var(--muted);
+  transition: transform 0.05s, box-shadow 0.05s;
+  overflow: hidden;
+}
+.preset-btn:hover {
+  filter: brightness(1.05);
+}
+.preset-btn:active {
+  transform: translate(1px, 1px);
+  box-shadow: 1px 1px 0 var(--pixel-shadow);
+}
+.preset-btn img {
+  width: 100%;
+  aspect-ratio: 1;
+  object-fit: contain;
+  image-rendering: pixelated;
+  background: var(--bg);
+}
+.preset-name {
+  font-size: 12px;
+  color: var(--muted);
+}
+
+/* ============================ 画板 ============================ */
+.canvas-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+.pixel-canvas {
+  background: #fff;
+  border: 4px solid var(--pixel-border);
+  box-shadow: inset 0 0 0 2px var(--frame-inset), 4px 4px 0 var(--pixel-shadow);
+  max-width: 100%;
+  height: auto;
+  image-rendering: pixelated;
+}
+.tool-cursor--pen {
+  cursor: crosshair;
+}
+.tool-cursor--eraser {
+  cursor: cell;
+}
+.tool-cursor--fill {
+  cursor: copy;
+}
+.tool-cursor--picker {
+  cursor: alias;
+}
+.canvas-hint {
+  font-size: 12px;
+  color: var(--muted);
+  letter-spacing: 0px;
+}
+
+/* ============================ 预览 ============================ */
+.preview-head {
+  margin-bottom: 10px;
+}
+.preview-big {
+  display: flex;
+  justify-content: center;
+  padding: 14px;
+  background: var(--bg2);
+  border: 3px solid var(--pixel-border);
+  box-shadow: inset 0 0 0 2px var(--frame-inset), 3px 3px 0 var(--pixel-shadow);
+  margin-bottom: 10px;
+}
+.preview-big canvas {
+  image-rendering: pixelated;
+  max-width: 100%;
+  height: auto;
+}
+.preview-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 8px 0;
+  border-bottom: 2px dashed var(--panel-dark);
+}
+.preview-actual {
+  border: 2px solid var(--pixel-border);
+  box-shadow: 2px 2px 0 var(--pixel-shadow);
+  image-rendering: pixelated;
+  background: var(--bg2);
+}
+
+.export-opts {
+  margin-top: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.field > span {
+  font-size: 12px;
+  color: var(--muted);
+}
+.field .seg-btn {
+  padding: 6px 2px;
+}
+.check {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  cursor: pointer;
+}
+.check input {
+  accent-color: var(--accent-2);
+  width: 16px;
+  height: 16px;
+}
+.export-opts .btn-row {
+  margin-top: 4px;
+}
+.export-opts .primary-btn {
+  flex: 1;
+}
+
+/* ============================ 调色板 ============================ */
+.palette-card {
+  max-height: 520px;
+  overflow-y: auto;
+}
+.palette-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+.current-chip {
+  width: 28px;
+  height: 28px;
+  border: 3px solid var(--pixel-border);
+  box-shadow: 2px 2px 0 var(--pixel-shadow);
+  flex-shrink: 0;
+}
+.custom-pick {
+  margin-left: auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
+  color: var(--muted);
+  cursor: pointer;
+  border: 2px solid var(--pixel-border);
+  box-shadow: 2px 2px 0 var(--pixel-shadow);
+  padding: 4px 8px;
+  background: var(--panel-2);
+  transition: transform 0.05s, box-shadow 0.05s;
+}
+.custom-pick:hover {
+  color: var(--accent);
+}
+.custom-pick:active {
+  transform: translate(1px, 1px);
+  box-shadow: 1px 1px 0 var(--pixel-shadow);
+}
+.custom-pick input {
+  width: 0;
+  height: 0;
+  opacity: 0;
+  position: absolute;
+}
+
+.palette-group {
+  margin-bottom: 12px;
+}
+.pg-title {
+  font-size: 12px;
+  color: var(--muted);
+  margin-bottom: 6px;
+}
+.swatches {
+  display: grid;
+  grid-template-columns: repeat(8, 1fr);
+  gap: 4px;
+}
+/* 像素色块 */
+.swatch {
+  aspect-ratio: 1;
+  border: 2px solid var(--pixel-border);
+  box-shadow: 1px 1px 0 var(--pixel-shadow);
+  cursor: pointer;
+  transition: transform 0.05s, box-shadow 0.05s;
+}
+.swatch:hover {
+  transform: translate(-1px, -1px);
+  box-shadow: 2px 2px 0 var(--pixel-shadow);
+  z-index: 1;
+}
+.swatch.active {
+  border-color: var(--text);
+  box-shadow: inset 0 0 0 2px var(--accent), 2px 2px 0 var(--pixel-shadow);
+  transform: scale(1.08);
+}
+.swatch-none {
+  background: linear-gradient(135deg, var(--bg) 50%, var(--panel) 50%);
+}
+
+/* ============================ 响应式 ============================ */
+@media (max-width: 1100px) {
+  .layout {
+    grid-template-columns: 1fr;
+  }
+  .toolbar {
+    position: static;
+  }
+  .right-col {
+    flex-direction: column;
+  }
+}
+@media (max-width: 560px) {
+  .app-header {
+    padding: 12px 14px;
+  }
+  .brand h1 {
+    font-size: 12px;
+  }
+  .gh {
+    display: none;
+  }
+  .layout {
+    padding: 10px;
+    gap: 10px;
+  }
+  .pixel-canvas {
+    width: 100%;
+  }
+  .swatches {
+    grid-template-columns: repeat(6, 1fr);
+  }
+}
