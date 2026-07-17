@@ -6,6 +6,9 @@ const ALPHA_THRESHOLD = 32
 /** 最大文件大小（10 MB） */
 export const MAX_FILE_SIZE = 10 * 1024 * 1024
 
+/** 大图预缩放的安全尺寸上限：超过此值先双线性缩放到此尺寸再做锐化+区域平均 */
+const MAX_PROCESS_SIZE = 1024
+
 /** 允许的图片 MIME 类型 */
 const ACCEPTED_TYPES = ['image/png', 'image/jpeg', 'image/webp', 'image/gif', 'image/bmp', 'image/svg+xml']
 
@@ -15,9 +18,10 @@ const ACCEPTED_TYPES = ['image/png', 'image/jpeg', 'image/webp', 'image/gif', 'i
  * 流程：
  * 1. 校验文件类型与大小
  * 2. 读取为 data URL → Image 元素
- * 3. 居中方裁（取中心正方形区域）
- * 4. 最近邻降采样到 targetSize × targetSize
- * 5. 构建 PixelGrid（alpha > 阈值 → #rrggbb，否则 null）
+ * 3. 居中方裁（取中心正方形区域），若边长 > 1024 则双线性预缩放
+ * 4. 拉普拉斯锐化卷积（增强边缘）
+ * 5. 区域平均降采样到 targetSize × targetSize（box filter 抗混叠）
+ * 6. 构建 PixelGrid（alpha > 阈值 → #rrggbb，否则 null）
  */
 export function imageFileToGrid(file: File, targetSize: number): Promise<PixelGrid> {
   // —— 校验 ——
@@ -49,12 +53,7 @@ export function imageFileToGrid(file: File, targetSize: number): Promise<PixelGr
 }
 
 /**
- * 纯 Canvas 采样：居中方裁 + 最近邻降采样 → PixelGrid。
- *
- * 居中方裁逻辑：
- * - 取图片较短边为方裁边长 cropSize
- * - 裁剪起点 (sx, sy) 使正方形区域居中
- * - 用 drawImage(img, sx, sy, cropSize, cropSize, 0, 0, targetSize, targetSize) 一步完成方裁+降采样
+ * 图片像素化核心：居中方裁 → 锐化卷积 → 区域平均降采样 → PixelGrid。
  */
 function sampleImage(img: HTMLImageElement, targetSize: number): PixelGrid {
   const w = img.naturalWidth
@@ -65,34 +64,142 @@ function sampleImage(img: HTMLImageElement, targetSize: number): PixelGrid {
   const sx = Math.floor((w - cropSize) / 2)
   const sy = Math.floor((h - cropSize) / 2)
 
-  // 离屏 canvas，目标尺寸
+  // 1. 裁切 + 预缩放到安全尺寸 → ImageData
+  const { data, width: srcW, height: srcH } = cropToImageData(img, sx, sy, cropSize)
+
+  // 2. 拉普拉斯锐化卷积（原地修改 RGB，增强边缘）
+  sharpenConvolution(data, srcW, srcH)
+
+  // 3. 区域平均降采样 → PixelGrid
+  return areaAverageDownsample(data, srcW, srcH, targetSize)
+}
+
+/**
+ * 裁切源图正方形区域，若边长超过 MAX_PROCESS_SIZE 则双线性预缩放。
+ * 返回可用于卷积和降采样的 ImageData。
+ */
+function cropToImageData(
+  img: HTMLImageElement,
+  sx: number,
+  sy: number,
+  cropSize: number,
+): ImageData {
+  const drawSize = Math.min(cropSize, MAX_PROCESS_SIZE)
   const canvas = document.createElement('canvas')
-  canvas.width = targetSize
-  canvas.height = targetSize
+  canvas.width = drawSize
+  canvas.height = drawSize
   const ctx = canvas.getContext('2d')!
 
-  // 最近邻降采样：关闭平滑
-  ctx.imageSmoothingEnabled = false
-  ctx.clearRect(0, 0, targetSize, targetSize)
-  ctx.drawImage(img, sx, sy, cropSize, cropSize, 0, 0, targetSize, targetSize)
+  if (drawSize === cropSize) {
+    // 原尺寸裁切，用最近邻保持像素准确
+    ctx.imageSmoothingEnabled = false
+  } else {
+    // 大图预缩放，用高质量双线性保留信息
+    ctx.imageSmoothingEnabled = true
+    ctx.imageSmoothingQuality = 'high'
+  }
+  ctx.clearRect(0, 0, drawSize, drawSize)
+  ctx.drawImage(img, sx, sy, cropSize, cropSize, 0, 0, drawSize, drawSize)
 
-  // 逐像素构建 PixelGrid
-  const data = ctx.getImageData(0, 0, targetSize, targetSize).data
+  return ctx.getImageData(0, 0, drawSize, drawSize)
+}
+
+/**
+ * 3×3 拉普拉斯锐化卷积（原地修改 ImageData 的 RGB 通道）。
+ *
+ * 核：           计算：
+ *  0 -1  0       out = 5*center - up - down - left - right
+ * -1  5 -1
+ *  0 -1  0
+ *
+ * - 仅卷积 RGB，alpha 通道不动（保持透明区域边界清晰）
+ * - 边缘像素用镜像填充（clamp 坐标）
+ * - Uint8ClampedArray 自动 clamp 到 [0, 255]
+ */
+function sharpenConvolution(data: Uint8ClampedArray, w: number, h: number): void {
+  // 复制原始数据作为卷积输入（避免原地修改影响后续计算）
+  const src = new Uint8ClampedArray(data)
+
+  for (let y = 0; y < h; y++) {
+    for (let x = 0; x < w; x++) {
+      const idx = (y * w + x) * 4
+      // 镜像填充：边缘坐标 clamp 到有效范围
+      const xm = Math.max(0, x - 1)
+      const xp = Math.min(w - 1, x + 1)
+      const ym = Math.max(0, y - 1)
+      const yp = Math.min(h - 1, y + 1)
+
+      const c = (y * w + x) * 4
+      const l = (y * w + xm) * 4
+      const r = (y * w + xp) * 4
+      const u = (ym * w + x) * 4
+      const d = (yp * w + x) * 4
+
+      // RGB 三通道分别卷积：out = 5*center - left - right - up - down
+      data[idx] = 5 * src[c] - src[l] - src[r] - src[u] - src[d]
+      data[idx + 1] = 5 * src[c + 1] - src[l + 1] - src[r + 1] - src[u + 1] - src[d + 1]
+      data[idx + 2] = 5 * src[c + 2] - src[l + 2] - src[r + 2] - src[u + 2] - src[d + 2]
+      // alpha 不动：data[idx + 3] 保持原值
+    }
+  }
+}
+
+/**
+ * 区域平均降采样（box filter 抗混叠）。
+ *
+ * 每个目标像素 (tx, ty) 的颜色 = 源图中对应矩形区域 [sx0,sx1)×[sy0,sy1)
+ * 内所有像素的 RGBA 均值。
+ *
+ * 相比最近邻（取单点），覆盖 100% 源区域，颜色更准、细节更稳。
+ */
+function areaAverageDownsample(
+  data: Uint8ClampedArray,
+  srcW: number,
+  srcH: number,
+  targetSize: number,
+): PixelGrid {
   const grid: PixelGrid = Array.from({ length: targetSize }, () =>
     Array<string | null>(targetSize).fill(null),
   )
-  for (let y = 0; y < targetSize; y++) {
-    for (let x = 0; x < targetSize; x++) {
-      const i = (y * targetSize + x) * 4
-      const a = data[i + 3]
-      if (a > ALPHA_THRESHOLD) {
-        grid[y][x] = `#${hex(data[i])}${hex(data[i + 1])}${hex(data[i + 2])}`
+
+  for (let ty = 0; ty < targetSize; ty++) {
+    const sy0 = Math.floor((ty * srcH) / targetSize)
+    const sy1 = Math.floor(((ty + 1) * srcH) / targetSize)
+
+    for (let tx = 0; tx < targetSize; tx++) {
+      const sx0 = Math.floor((tx * srcW) / targetSize)
+      const sx1 = Math.floor(((tx + 1) * srcW) / targetSize)
+
+      // 累加 [sx0,sx1)×[sy0,sy1) 区域内所有像素的 RGBA
+      let r = 0
+      let g = 0
+      let b = 0
+      let a = 0
+      let count = 0
+
+      for (let y = sy0; y < sy1; y++) {
+        for (let x = sx0; x < sx1; x++) {
+          const i = (y * srcW + x) * 4
+          r += data[i]
+          g += data[i + 1]
+          b += data[i + 2]
+          a += data[i + 3]
+          count++
+        }
+      }
+
+      if (count === 0) continue
+
+      const avgA = a / count
+      if (avgA > ALPHA_THRESHOLD) {
+        grid[ty][tx] = `#${hex(r / count)}${hex(g / count)}${hex(b / count)}`
       }
     }
   }
+
   return grid
 }
 
 function hex(n: number): string {
-  return n.toString(16).padStart(2, '0')
+  return Math.round(n).toString(16).padStart(2, '0')
 }

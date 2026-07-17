@@ -3,10 +3,10 @@ AIGC:
   ContentProducer: '001191110102MAD55U9H0F10002'
   ContentPropagator: '001191110102MAD55U9H0F10002'
   Label: '1'
-  ProduceID: 'e7aa7415-fb92-4f65-8552-a56a1f92fd78'
-  PropagateID: 'e7aa7415-fb92-4f65-8552-a56a1f92fd78'
-  ReservedCode1: 'ba948411-9aa7-4b32-8ae4-8525f787830d'
-  ReservedCode2: 'ba948411-9aa7-4b32-8ae4-8525f787830d'
+  ProduceID: '65f836fd-410a-47b2-ba03-5224b3a4b307'
+  PropagateID: '65f836fd-410a-47b2-ba03-5224b3a4b307'
+  ReservedCode1: '7094ecfd-9750-4aac-9391-5ada6f61c9e5'
+  ReservedCode2: '7094ecfd-9750-4aac-9391-5ada6f61c9e5'
 ---
 
 # 像素头像工坊
@@ -16,7 +16,7 @@ AIGC:
 ## 功能
 
 - **DiceBear 随机生成** — 4 种风格（像素人 / 暖底 / 冷底 / 暗底）+ 8 个预设头像
-- **图片导入像素化** — 上传任意图片自动像素化为可编辑网格（纯 Canvas 最近邻降采样 + 居中方裁）
+- **图片导入像素化** — 上传任意图片自动像素化为可编辑网格（拉普拉斯锐化 + 区域平均降采样 + 居中方裁，高细节还原）
 - **像素画板编辑** — 画笔 / 橡皮 / 填充 / 吸管，支持水平 / 垂直 / 四向镜像绘制
 - **多尺寸画板** — 16/24/32/48 像素网格自由切换
 - **撤销 / 重做** — 完整历史栈（最多 60 步）
@@ -50,7 +50,7 @@ npm run preview
 | 构建工具 | Vite 5 |
 | 状态管理 | Zustand 5（含 persist + localStorage） |
 | 头像生成 | DiceBear Core + pixel-art 风格 |
-| 图片像素化 | 纯 Canvas API（无第三方依赖） |
+| 图片像素化 | 纯 Canvas API：拉普拉斯锐化卷积 + 区域平均降采样（无第三方依赖） |
 | 像素字体 | Silkscreen（英文）+ Zpix 子集（中文，6.8KB woff2） |
 
 ## 项目结构
@@ -65,7 +65,7 @@ src/
 │   └── useAvatarStore.ts     # Zustand store（状态 + 操作 + 历史 + 持久化）
 ├── utils/
 │   ├── dicebear.ts           # DiceBear 生成 + SVG→Grid Canvas 采样
-│   ├── imageImport.ts        # 图片文件→PixelGrid（居中方裁 + 最近邻降采样）
+│   ├── imageImport.ts        # 图片文件→PixelGrid（居中方裁 + 锐化卷积 + 区域平均降采样）
 │   └── canvas.ts             # Canvas 绘制 / 导出工具
 └── components/
     ├── Toolbar.tsx           # 左侧工具栏（工具/操作/镜像/尺寸/风格/生成/导入）
@@ -86,6 +86,7 @@ src/
 | 2026-07-17 | `refactor-zustand-state` | 自定义 hook → Zustand 全局 store 迁移 |
 | 2026-07-17 | `redesign-stardew-ui` | 星露谷物语风格 UI 重构 |
 | 2026-07-17 | `add-image-import` | 图片导入像素化功能（纯 Canvas 方案） |
+| 2026-07-17 | `enhance-pixel-fidelity` | 像素化算法升级：区域平均降采样 + 拉普拉斯锐化预处理 |
 
 ## 键盘快捷键
 
